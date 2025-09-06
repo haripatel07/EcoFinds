@@ -6,7 +6,7 @@ const ImageSchema = new mongoose.Schema({
 }, { _id: false });
 
 const ProductSchema = new mongoose.Schema({
-    title: { type: String, required: true, trim: true, index: 'text' },
+    title: { type: String, required: true, trim: true },
     description: { type: String, default: '' },
     category: { type: String, required: true, index: true },
     price: { type: Number, required: true, min: 0 },
@@ -15,10 +15,9 @@ const ProductSchema = new mongoose.Schema({
     images: { type: [ImageSchema], default: [{ url: '/placeholders/default.png', alt: 'placeholder' }] },
     available: { type: Boolean, default: true, index: true },
     condition: { type: String, enum: ['New', 'Like New', 'Good', 'Fair', 'Poor'], default: 'Good' },
-    location: { type: String, default: '' },
-    createdAt: { type: Date, default: Date.now, index: true },
-    updatedAt: { type: Date, default: Date.now }
-});
+    location: { type: String, default: '' }
+}, { timestamps: true });
 
 ProductSchema.index({ title: 'text', description: 'text' }, { weights: { title: 5, description: 1 } });
+
 module.exports = mongoose.model('Product', ProductSchema);
