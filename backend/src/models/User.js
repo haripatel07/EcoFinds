@@ -9,10 +9,11 @@ const UserSchema = new mongoose.Schema({
     isPhoneVerified: { type: Boolean, default: false },
     isEmailVerified: { type: Boolean, default: false },
     role: { type: String, enum: ['user', 'admin'], default: 'user' },
-    createdAt: { type: Date, default: Date.now },
     purchases: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Order' }],
     wishlist: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Product' }]
-});
+}, { timestamps: true });
 
 UserSchema.index({ email: 1 });
+UserSchema.index({ username: 1 });
+
 module.exports = mongoose.model('User', UserSchema);
