@@ -1,0 +1,85 @@
+Project Document: "EcoFinds - Sustainable Second-Hand Marketplace"
+
+The Challenge: "EcoFinds – Empowering Sustainable Consumption through a Second-Hand Marketplace"
+
+Overall Vision:
+The overarching vision for EcoFinds is to create a vibrant and trusted platform that revolutionizes the way people buy and sell pre-owned goods. It aims to foster a culture of sustainability by extending the lifecycle of products, reducing waste, and providing an accessible and convenient alternative to purchasing new items. EcoFinds envisions becoming the go-to destination for a conscious community seeking unique finds and responsible consumption.
+
+Mission:
+The mission for the hackathon team is to develop a user-friendly and engaging desktop and mobile application that serves as a central hub for buying and selling second-hand items. EcoFinds should leverage intuitive design and essential features to connect buyers and sellers efficiently, promoting a circular economy and making sustainable choices easier for everyone. This involves building a platform that is both functional and inspires trust and community.
+
+Problem Statement:
+Develop a foundational version of EcoFinds, focusing on core user authentication and product listing functionalities. Teams must deliver a functional prototype, accessible via both mobile and desktop interfaces, that allows users to register and log in, create and manage basic product listings (including title, description, category, price, and at least one image placeholder), and browse these listings with basic filtering and search capabilities. The system must employ efficient data structures for managing user and product data, ensuring a stable and responsive user experience.
+
+# What the judges want (quick)
+
+* A working, reliable prototype (mobile + desktop responsive).
+* Clear user flow: signup → list → browse → buy/simulate checkout.
+* Good UX, clean UI, and fast performance.
+* Demonstrated data model & correctness (auth, permissions, product CRUD).
+* Thoughtful features addressing the theme (sustainability, trust).
+* A compelling demo and short pitch explaining impact.
+
+# Hackathon-winning ideas (what elevates you above other teams)
+
+1. **Polished core UX** — crisp onboarding, easy add-listing flow, fast search and category filters, mobile-first.
+2. **Trust & safety features** — quick seller verification (email + optional phone OTP), listing status, buyer ratings, and “verified seller” badge.
+3. **Sustainability metrics** — show `CO₂ saved` / `estimated waste avoided` for each purchase or overall (simple heuristic: buying used = % of CO₂ saved vs new). Judges love mission-driven metrics.
+4. **Smart search & relevance** — debounce search, fuzzy matching, and category + price filters. Even a simple `title` regex search plus indexing looks good.
+5. **Atomic checkout & availability** — ensure item cannot be double-purchased (atomic DB update / `findOneAndUpdate` on available flag).
+6. **Nice polish: image placeholders → upload + preview** (Uploadcare/Cloudinary free tier) and responsive cards.
+7. **Demo-ready data** — seed DB with attractive, varied listings so the demo looks real.
+8. **Short onboarding/demo video & one-click demo account** — judges can instantly inspect the product.
+
+# Tech stack (fast, hackathon-friendly)
+
+* Frontend: **React** (Vite) + Tailwind CSS (responsive), build mobile-first UI. Use React Router.
+* Backend: **Node + Express** (fast to scaffold)
+* DB: **MongoDB Atlas** (free tier) using Mongoose — easy for quick iteration and flexible schema.
+* Auth: **JWT** + bcrypt. Optional Firebase Auth if you want social login quickly.
+* File uploads (images): **Cloudinary** or Uploadcare (free tiers) — or store placeholder URLs to simplify.
+* Hosting: Frontend on **Netlify/Vercel**, Backend on **Render/Heroku** or a single fullstack deploy on Render.
+* Optional: Use **ngrok** for live demo if backend not publicly deployed.
+
+# Minimal architecture (diagram in words)
+
+Frontend ↔ API Gateway (Express) ↔ MongoDB Atlas
+Auth middleware (JWT) protects create/edit/delete routes. Image uploads → Cloudinary (returns URL stored in Mongo).
+
+# MVP checklist (must-have for hackathon)
+
+* [ ] Signup + Login (email+password) + JWT handling
+* [ ] Edit profile (username + avatar placeholder)
+* [ ] Create product listing (title, description, category, price, image placeholder)
+* [ ] My listings (edit/delete) with authorization checks
+* [ ] Feed page: list of all available products (cards)
+* [ ] Product detail page (full info)
+* [ ] Search (title) + category filter + pagination or lazy load
+* [ ] Cart + checkout simulation (moves items to `purchases`)
+* [ ] Previous purchases page
+* [ ] Deployed demo + seeded demo user credentials + README with run steps
+
+# Stretch features (use sparingly — only if MVP is stable)
+
+* Seller verification (phone OTP)
+* Ratings & reviews + “trust score”
+* Sustainability score: show `Estimated Waste Reduced` / `Eco Points` per sale
+* Fuzzy search (Fuse.js) for better search UX
+* Notifications (in-app or email stub) for when an item is purchased
+* Realtime updates (WebSocket) so listings auto-refresh
+* Image upload & cropping on add-product form
+* Admin dashboard to manage categories & moderate listings
+
+# Security & correctness highlights (small wins that impress judges)
+
+* Hash passwords with bcrypt and never log secrets.
+* Use `--force-with-lease` note if showing git history practices.
+* Protect endpoints with JWT and check ownership before editing/deleting.
+* Atomic product purchase: `findOneAndUpdate({ _id, available: true }, { $set: { available: false } })`.
+
+# UX & UI tips that score points
+
+* Mobile-first responsive cards and big tappable buttons.
+* Microcopy: show friendly copy like “Why buy new? This item saves \~X kg CO₂.”
+* Use a distinct action color for primary actions and a floating “+” add button.
+* Quick demo flows: include demo credentials and a demo script.
