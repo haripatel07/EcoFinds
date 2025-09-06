@@ -25,7 +25,7 @@ async function register(req, res, next) {
 
         const token = signToken({ id: user._id });
         const verifyToken = signToken({ id: user._id, verify: true }, '15m'); // short expiry
-        await sendVerificationEmail(user.email, verifyToken).catch(() => { });
+        await sendVerificationEmail(user, verifyToken).catch(() => { });
 
         res.status(201).json({
             user: { id: user._id, email: user.email, username: user.username },
