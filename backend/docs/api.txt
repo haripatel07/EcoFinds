@@ -1,0 +1,51 @@
+# EcoFinds Backend - Endpoints Reference
+
+Auth
+- POST /api/auth/register            (public)  - body: { email, password, username } -> 201 { user, token }
+- POST /api/auth/login               (public)  - body: { email, password } -> 200 { user, token }
+- GET  /api/auth/verify-email        (public)  - query: token -> verify email
+
+Users
+- GET  /api/users/me                 (auth)    - returns current user
+- PUT  /api/users/me                 (auth)    - update username/avatarUrl/phone
+
+Products
+- GET    /api/products               (public)  - query: q, category, page, limit
+- GET    /api/products/:id           (public)  - product detail
+- POST   /api/products               (auth)    - create product
+- PUT    /api/products/:id           (auth, owner) - update product
+- DELETE /api/products/:id           (auth, owner) - delete product
+- POST   /api/products/:id/flag      (auth)    - report a product
+
+Cart & Checkout
+- GET    /api/cart                   (auth)    - get cart
+- POST   /api/cart                   (auth)    - add item { productId, qty }
+- PUT    /api/cart                   (auth)    - replace items: { items: [ { product, qty, priceAtAdd } ] }
+- DELETE /api/cart/:productId        (auth)    - remove item
+- POST   /api/cart/checkout          (auth)    - checkout cart (transactional)
+- POST   /api/checkout               (auth)    - alias for cart checkout (API.md)
+
+Orders
+- GET /api/orders                    (auth)    - list user's orders
+- GET /api/orders/:id                (auth)    - get specific order (buyer or admin)
+
+Categories (optional)
+- GET  /api/categories               (public)
+- POST /api/categories               (auth + admin)
+
+Reviews
+- GET  /api/products/:id/reviews     (public)
+- POST /api/products/:id/reviews     (auth)    - { rating, comment }
+
+Flags / Moderation
+- POST /api/products/:id/flag        (auth)    - report product (same as above)
+- GET  /api/flags                    (auth + admin) - moderation list
+
+Health
+- GET /health                        (public)  - returns { status: 'ok' }
+
+Notes
+- Auth uses JWT in Authorization: Bearer <token>
+- Admin routes check `req.user.role === 'admin'`
+- Cart checkout uses MongoDB transactions when available and marks products unavailable atomically
+- Validation performed via express-validator; required fields enforced on routes that accept JSON bodies

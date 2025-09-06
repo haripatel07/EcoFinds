@@ -14,6 +14,8 @@ const ordersRoutes = require('./routes/orders.routes');
 const categoriesRoutes = require('./routes/categories.routes');
 const reviewsRoutes = require('./routes/reviews.routes');
 const flagsRoutes = require('./routes/flags.routes');
+const path = require('path');
+const fs = require('fs');
 
 const app = express();
 app.use(helmet());
@@ -35,6 +37,17 @@ app.use('/api/orders', ordersRoutes);
 app.use('/api/categories', categoriesRoutes);
 app.use('/api/products/:id/reviews', reviewsRoutes);
 app.use('/api/flags', flagsRoutes);
+
+// Serve docs static UI
+app.use('/docs', express.static(path.join(__dirname, 'public', 'docs')));
+
+// endpoint to return api.txt contents used by the docs UI
+app.get('/api/endpoints', (req, res) => {
+    const file = path.join(__dirname, '..', 'api.txt');
+    if (!fs.existsSync(file)) return res.json({ text: '' });
+    const text = fs.readFileSync(file, 'utf8');
+    res.json({ text });
+});
 
 app.get('/health', (req, res) => res.json({ status: 'ok' }));
 
