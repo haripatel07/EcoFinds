@@ -40,6 +40,8 @@ Reviews
 Flags / Moderation
 - POST /api/products/:id/flag        (auth)    - report product (same as above)
 - GET  /api/flags                    (auth + admin) - moderation list
+- GET  /api/wishlist                 (auth) - current user's wishlist
+- POST /api/wishlist/:productId      (auth) - toggle wishlist item
 
 Health
 - GET /health                        (public)  - returns { status: 'ok' }

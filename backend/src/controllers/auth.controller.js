@@ -23,13 +23,11 @@ async function register(req, res, next) {
         const hash = await bcrypt.hash(password, config.bcryptRounds);
         const user = await User.create({ email, passwordHash: hash, username });
 
-        const token = signToken({ id: user._id });
-        const verifyToken = signToken({ id: user._id, verify: true }, '15m'); // short expiry
+        const verifyToken = signToken({ id: user._id, verify: true }, '30m'); // verification token
         await sendVerificationEmail(user, verifyToken).catch(() => { });
-
         res.status(201).json({
             user: { id: user._id, email: user.email, username: user.username },
-            token
+            message: 'Registration successful. Please verify your email before logging in.'
         });
     } catch (err) { next(err); }
 }
@@ -77,4 +75,16 @@ async function login(req, res, next) {
     } catch (err) { next(err); }
 }
 
-module.exports = { register, login, verifyEmail };
+async function resendVerification(req, res, next) {
+    try {
+        const { email } = req.body;
+        if (!email) return res.status(400).json({ error: { code: 'BAD_REQUEST', message: 'Email required' } });
+        const user = await User.findOne({ email });
+        if (!user) return res.status(404).json({ error: { code: 'NOT_FOUND', message: 'User not found' } });
+        if (user.isEmailVerified) return res.json({ message: 'Already verified' });
+        const verifyToken = signToken({ id: user._id, verify: true }, '30m');
+        await sendVerificationEmail(user, verifyToken).catch(() => { });
+        res.json({ message: 'Verification email resent' });
+    } catch (err) { next(err); }
+}
+module.exports = { register, login, verifyEmail, resendVerification };

@@ -24,7 +24,7 @@ const productUpdate = [
 
 const cartPost = [
     body('productId').isMongoId().withMessage('Valid productId is required'),
-    body('qty').optional().isInt({ min: 1 }).withMessage('qty must be >=1')
+    body('quantity').isInt({ min: 1 }).withMessage('Quantity must be a positive integer')
 ];
 
 const cartPut = [
@@ -51,15 +51,15 @@ const checkout = [
     body('paymentMethod').optional().isString()
 ];
 
-module.exports = { 
-    register, 
-    login, 
-    productCreate, 
-    productUpdate, 
-    cartPost, 
-    cartPut, 
-    categoryCreate, 
-    reviewCreate, 
-    flagCreate, 
-    checkout 
+module.exports = {
+    register,
+    login,
+    productCreate,
+    productUpdate,
+    cartPost,
+    cartPut,
+    categoryCreate,
+    reviewCreate,
+    flagCreate,
+    checkout
 };

@@ -17,6 +17,7 @@ const ordersRoutes = require('./routes/orders.routes');
 const categoriesRoutes = require('./routes/categories.routes');
 const reviewsRoutes = require('./routes/reviews.routes');
 const flagsRoutes = require('./routes/flags.routes');
+const wishlistRoutes = require('./routes/wishlist.routes');
 
 // init
 const app = express();
@@ -51,6 +52,7 @@ app.use('/api/orders', ordersRoutes);
 app.use('/api/categories', categoriesRoutes);
 app.use('/api/products/:id/reviews', reviewsRoutes);
 app.use('/api/flags', flagsRoutes);
+app.use('/api/wishlist', wishlistRoutes);
 
 // docs
 app.use('/docs', express.static(path.join(__dirname, 'public', 'docs')));

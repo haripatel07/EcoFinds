@@ -1,0 +1,37 @@
+.ef-nav {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px 16px;
+    background: #0b3d2e;
+    color: #fff
+}
+
+.ef-nav a {
+    color: inherit;
+    margin-right: 12px;
+    text-decoration: none
+}
+
+.ef-nav .logo {
+    font-weight: 700;
+    margin-right: 16px
+}
+
+.ef-nav-right {
+    display: flex;
+    align-items: center;
+    gap: 8px
+}
+
+.ef-logout {
+    background: transparent;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    color: #fff;
+    padding: 6px 8px;
+    border-radius: 4px
+}
+
+.ef-user {
+    margin-right: 8px
+}

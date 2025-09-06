@@ -1,8 +1,17 @@
 #root {
-  max-width: 1280px;
+  width: 100%;
+  min-height: 100vh;
+}
+
+/* Optional utility container for centered readable width when needed */
+.ef-container {
+  max-width: 1200px;
   margin: 0 auto;
-  padding: 2rem;
-  text-align: center;
+  padding: 1rem 1.25rem;
+}
+
+main {
+  width: 100%;
 }
 
 .logo {
@@ -11,9 +20,11 @@
   will-change: filter;
   transition: filter 300ms;
 }
+
 .logo:hover {
   filter: drop-shadow(0 0 2em #646cffaa);
 }
+
 .logo.react:hover {
   filter: drop-shadow(0 0 2em #61dafbaa);
 }
@@ -22,6 +33,7 @@
   from {
     transform: rotate(0deg);
   }
+
   to {
     transform: rotate(360deg);
   }

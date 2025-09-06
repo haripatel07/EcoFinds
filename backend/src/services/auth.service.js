@@ -6,8 +6,8 @@ const logger = require('../utils/logger');
 const fs = require('fs');
 const path = require('path');
 
-function signToken(payload) {
-  return jwt.sign(payload, config.jwtSecret, { expiresIn: config.jwtExpire });
+function signToken(payload, expiresIn = config.jwtExpire) {
+  return jwt.sign(payload, config.jwtSecret, { expiresIn });
 }
 
 async function sendVerificationEmail(user, token) {

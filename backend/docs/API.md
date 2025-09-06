@@ -384,6 +384,8 @@ GET    /api/products/:id/reviews  # public
 POST   /api/products/:id/reviews  # auth (buyer only ideally)
 POST   /api/products/:id/flag     # auth (report)
 GET    /api/flags                 # auth admin (moderation)
+GET    /api/wishlist              # auth (current user's wishlist)
+POST   /api/wishlist/:productId   # auth (toggle wishlist)
 ```
 
 ---

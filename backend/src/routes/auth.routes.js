@@ -2,7 +2,7 @@ const express = require('express');
 const { query } = require('express-validator');
 const router = express.Router();
 
-const { register, login, verifyEmail } = require('../controllers/auth.controller');
+const { register, login, verifyEmail, resendVerification } = require('../controllers/auth.controller');
 const validate = require('../middleware/validate.middleware');
 const { register: registerRules, login: loginRules } = require('../utils/validators');
 
@@ -19,5 +19,8 @@ router.get(
   validate,
   verifyEmail
 );
+
+// Resend verification
+router.post('/resend-verification', resendVerification);
 
 module.exports = router;
