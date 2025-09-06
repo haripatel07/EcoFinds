@@ -1,5 +1,10 @@
 import 'package:flutter/material.dart';
 import 'user_storage.dart';
+import 'pages/my_listings_page.dart';
+import 'pages/cart_page.dart';
+import 'pages/add_product_page.dart';
+import 'login_page.dart';
+import 'widgets/app_drawer.dart';
 
 class DashboardPage extends StatefulWidget {
   const DashboardPage({super.key});
@@ -125,7 +130,14 @@ class _DashboardPageState extends State<DashboardPage> {
   }
 
   void _showMyListings() {
-    // Do nothing - no functionality implemented yet
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => MyListingsPage(
+          sellerId: currentUser?['email'] ?? 'default_user',
+        ),
+      ),
+    );
   }
 
   void _showMyPurchases() {
@@ -136,9 +148,10 @@ class _DashboardPageState extends State<DashboardPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.black,
+      drawer: const AppDrawer(),
       appBar: AppBar(
         backgroundColor: Colors.black,
-        leading: const Icon(Icons.menu, color: Colors.white),
+        iconTheme: const IconThemeData(color: Colors.white),
         title: Container(
           height: 30,
           child: Image.asset(
@@ -158,6 +171,15 @@ class _DashboardPageState extends State<DashboardPage> {
         ),
         centerTitle: true,
         actions: [
+          IconButton(
+            icon: const Icon(Icons.shopping_cart, color: Colors.white),
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => const CartPage()),
+              );
+            },
+          ),
           const Icon(Icons.person, color: Colors.white),
           const SizedBox(width: 16),
         ],

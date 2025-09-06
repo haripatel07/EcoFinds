@@ -2,6 +2,9 @@ import 'package:flutter/material.dart';
 import 'login_page.dart';
 import 'signup_page.dart';
 import 'dashboard_page.dart';
+import 'pages/cart_page.dart';
+import 'services/cart_storage.dart';
+import 'widgets/app_drawer.dart';
 
 void main() {
   runApp(const MyApp());
@@ -23,21 +26,43 @@ class MyApp extends StatelessWidget {
         '/login': (context) => const LoginPage(),
         '/signup': (context) => const SignUpPage(),
         '/dashboard': (context) => const DashboardPage(),
+        '/cart': (context) => const CartPage(),
       },
     );
   }
 }
 
-class LandingPage extends StatelessWidget {
+class LandingPage extends StatefulWidget {
   const LandingPage({super.key});
+
+  @override
+  State<LandingPage> createState() => _LandingPageState();
+}
+
+class _LandingPageState extends State<LandingPage> {
+  int _cartItemsCount = 0;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadCartCount();
+  }
+
+  Future<void> _loadCartCount() async {
+    final count = await CartStorage.getCartItemsCount();
+    setState(() {
+      _cartItemsCount = count;
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.black,
+      drawer: const AppDrawer(),
       appBar: AppBar(
         backgroundColor: Colors.black,
-        leading: const Icon(Icons.menu, color: Colors.white),
+        iconTheme: const IconThemeData(color: Colors.white),
         title: Container(
           height: 40,
           child: Image.asset(
@@ -58,11 +83,43 @@ class LandingPage extends StatelessWidget {
         ),
         centerTitle: true,
         actions: [
-          IconButton(
-            icon: const Icon(Icons.shopping_cart, color: Colors.white),
-            onPressed: () {
-              // Navigate to cart page (future implementation)
-            },
+          Stack(
+            children: [
+              IconButton(
+                icon: const Icon(Icons.shopping_cart, color: Colors.white),
+                onPressed: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (context) => const CartPage()),
+                  );
+                },
+              ),
+              if (_cartItemsCount > 0)
+                Positioned(
+                  right: 8,
+                  top: 8,
+                  child: Container(
+                    padding: const EdgeInsets.all(2),
+                    decoration: BoxDecoration(
+                      color: Colors.red,
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                    constraints: const BoxConstraints(
+                      minWidth: 16,
+                      minHeight: 16,
+                    ),
+                    child: Text(
+                      '$_cartItemsCount',
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontSize: 12,
+                        fontWeight: FontWeight.bold,
+                      ),
+                      textAlign: TextAlign.center,
+                    ),
+                  ),
+                ),
+            ],
           ),
           PopupMenuButton<String>(
             icon: const Icon(Icons.account_circle, color: Colors.white),
