@@ -20,7 +20,16 @@ const flagsRoutes = require('./routes/flags.routes');
 
 // init
 const app = express();
-app.use(helmet());
+app.use(
+    helmet({
+        contentSecurityPolicy: {
+            directives: {
+                ...helmet.contentSecurityPolicy.getDefaultDirectives(),
+                "script-src": ["'self'", "cdn.jsdelivr.net", "'unsafe-inline'"],
+            },
+        },
+    })
+);
 app.use(cors());
 app.use(express.json());
 app.use(morgan('dev'));
@@ -53,6 +62,28 @@ app.get('/api/endpoints', (req, res) => {
     const text = fs.readFileSync(file, 'utf8');
     res.json({ text });
 });
+
+// API endpoints text - return the docs/api.txt content (serve from public/docs)
+app.get('/api/endpoints', (req, res) => {
+    // use the same folder used by the static docs: backend/public/docs/api.txt
+    const file = path.join(__dirname, 'public', 'docs', 'api.txt');
+
+    if (!fs.existsSync(file)) return res.status(404).json({ text: '', message: 'api.txt not found' });
+
+    try {
+        const text = fs.readFileSync(file, 'utf8');
+        return res.json({ text });
+    } catch (err) {
+        logger.error('Failed to read api.txt', err);
+        return res.status(500).json({ text: '', message: 'failed to read api.txt' });
+    }
+});
+
+// ensure /docs loads index.html explicitly (helps browser & proxies)
+app.get('/docs', (req, res) => {
+    res.sendFile(path.join(__dirname, 'public', 'docs', 'index.html'));
+});
+
 
 app.get('/health', (req, res) => res.json({ status: 'ok' }));
 
