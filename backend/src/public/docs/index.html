@@ -91,50 +91,51 @@
     </header>
     <div class="wrap">
         <div class="left">
-            <input id="q" class="search" placeholder="search endpoints (e.g. /api/products)" />
+            <div style="display:flex;gap:8px;margin-bottom:8px">
+                <input id="q" class="search" placeholder="search endpoints (e.g. /api/products)" />
+                <button id="refresh"
+                    style="padding:6px 10px;border-radius:6px;background:#0b2340;color:#cfe">Refresh</button>
+            </div>
             <div class="list" id="list"></div>
         </div>
         <div class="right">
             <div id="meta" class="small">Select an endpoint to view details.</div>
-            <pre id="detail">Loading...</pre>
+            <div id="detail">Loading...</div>
+            <pre id="debug"
+                style="margin-top:12px;background:#061022;padding:8px;border-radius:6px;color:#9fb0d9;height:80px;overflow:auto">debug: init</pre>
         </div>
     </div>
 
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
     <script>
-        async function load() {
-            const res = await fetch('/api/endpoints');
-            const data = await res.json();
-            const text = data.text || '';
-            // parse into sections by blank lines and headings
-            const sections = text.split('\n\n').map(s => s.trim()).filter(Boolean);
-            const items = [];
-            // simple heuristic: lines that start with METHOD PATH or lines with '/api/'
-            sections.forEach(s => {
-                const first = s.split('\n')[0];
-                if (first.match(/POST|GET|PUT|DELETE|PATCH|GET\s+\/api\//) || s.includes('/api/')) items.push({ title: first, body: s });
-            });
-            // fallback: if no items, show raw
-            const list = document.getElementById('list');
-            if (items.length === 0) {
-                list.innerHTML = '<div class="item">No structured endpoints found — raw view below</div>';
-                document.getElementById('detail').textContent = text;
-                return;
+        async function loadAndRender() {
+            const detail = document.getElementById('detail');
+            const debug = document.getElementById('debug');
+            try {
+                debug.textContent = 'debug: fetching /docs/api.txt...';
+                const response = await fetch('/docs/api.txt');
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                const text = await response.text();
+                debug.textContent = 'debug: fetched ' + text.length + ' chars. rendering...';
+                detail.innerHTML = marked.parse(text);
+                debug.textContent = 'debug: rendered successfully.';
+            } catch (e) {
+                console.error('Failed to load and render API docs:', e);
+                const errorMessage = `Failed to load API docs. Error: ${e.message}. Please check the browser console for more details.`;
+                detail.textContent = errorMessage;
+                debug.textContent = 'error: ' + (e.stack || String(e));
             }
-            items.forEach((it, idx) => {
-                const el = document.createElement('div'); el.className = 'item'; el.textContent = it.title.substring(0, 80);
-                el.onclick = () => { document.getElementById('detail').textContent = it.body; document.getElementById('meta').textContent = it.title };
-                list.appendChild(el);
-                if (idx === 0) { el.click(); }
-            });
-
-            document.getElementById('q').addEventListener('input', (e) => {
-                const q = e.target.value.toLowerCase();
-                list.childNodes.forEach((node, i) => {
-                    node.style.display = items[i].body.toLowerCase().includes(q) ? '' : 'none';
-                });
-            });
         }
-        load().catch(e => { document.getElementById('detail').textContent = 'Failed to load endpoints: ' + e.message });
+
+        document.addEventListener('DOMContentLoaded', () => {
+            loadAndRender();
+            const refreshButton = document.getElementById('refresh');
+            if (refreshButton) {
+                refreshButton.addEventListener('click', loadAndRender);
+            }
+        });
     </script>
 </body>
 

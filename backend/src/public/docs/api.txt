@@ -1,0 +1,232 @@
+# EcoFinds Backend - Endpoints Reference
+
+Auth
+- POST /api/auth/register            (public)  - body: { email, password, username } -> 201 { user, token }
+- POST /api/auth/login               (public)  - body: { email, password } -> 200 { user, token }
+- GET  /api/auth/verify-email        (public)  - query: token -> verify email
+
+Users
+- GET  /api/users/me                 (auth)    - returns current user
+- PUT  /api/users/me                 (auth)    - update username/avatarUrl/phone
+
+Products
+- GET    /api/products               (public)  - query: q, category, page, limit
+- GET    /api/products/:id           (public)  - product detail
+- POST   /api/products               (auth)    - create product
+- PUT    /api/products/:id           (auth, owner) - update product
+- DELETE /api/products/:id           (auth, owner) - delete product
+- POST   /api/products/:id/flag      (auth)    - report a product
+
+Cart & Checkout
+- GET    /api/cart                   (auth)    - get cart
+- POST   /api/cart                   (auth)    - add item { productId, qty }
+- PUT    /api/cart                   (auth)    - replace items: { items: [ { product, qty, priceAtAdd } ] }
+- DELETE /api/cart/:productId        (auth)    - remove item
+- POST   /api/cart/checkout          (auth)    - checkout cart (transactional)
+- POST   /api/checkout               (auth)    - alias for cart checkout (API.md)
+
+Orders
+- GET /api/orders                    (auth)    - list user's orders
+- GET /api/orders/:id                (auth)    - get specific order (buyer or admin)
+
+Categories (optional)
+- GET  /api/categories               (public)
+- POST /api/categories               (auth + admin)
+
+Reviews
+- GET  /api/products/:id/reviews     (public)
+- POST /api/products/:id/reviews     (auth)    - { rating, comment }
+
+Flags / Moderation
+- POST /api/products/:id/flag        (auth)    - report product (same as above)
+- GET  /api/flags                    (auth + admin) - moderation list
+
+Health
+- GET /health                        (public)  - returns { status: 'ok' }
+
+# EcoFinds — Endpoint Reference (website-style)
+
+This file documents every backend endpoint implemented in the repo. For each endpoint you'll find: purpose, HTTP method & path, auth/role required, request example, response example and common error responses.
+
+Tip: all endpoints use JSON. Protected endpoints require the header: Authorization: Bearer <jwt>
+
+---
+
+AUTH
+
+- POST /api/auth/register
+  - Purpose: Create a new user and send an email verification link.
+  - Auth: public
+  - Request:
+    {
+      "email": "captain@example.com",
+      "password": "S3cret!",
+      "username": "captain"
+    }
+  - Response (201):
+    { "user": { "id":"<userId>", "email":"captain@example.com", "username":"captain" }, "token": "<jwt>" }
+  - Errors: 400 validation, 409 email already used
+
+- POST /api/auth/login
+  - Purpose: Authenticate user and return JWT.
+  - Auth: public
+  - Request: { "email":"captain@example.com", "password":"S3cret!" }
+  - Response (200): { "user": { "id":"<userId>", "email":"...","username":"..." }, "token":"<jwt>" }
+  - Errors: 401 invalid creds, 403 email not verified
+
+- GET /api/auth/verify-email?token=<token>
+  - Purpose: Verify user email when link is clicked (token issued at registration).
+  - Auth: public (token in query)
+  - Response: { "message": "Email verified" }
+  - Errors: 400 invalid/expired token, 404 user not found
+
+USERS
+
+- GET /api/users/me
+  - Purpose: Return authenticated user's profile (safe fields only).
+  - Auth: Bearer JWT
+  - Response (200): { id, email, username, avatarUrl, phone, isPhoneVerified, isEmailVerified, role, createdAt, wishlist, purchases }
+  - Errors: 401 missing/invalid token
+
+- PUT /api/users/me
+  - Purpose: Update user's profile (username, avatarUrl, phone).
+  - Auth: Bearer JWT
+  - Request (partial allowed): { "username":"newName", "avatarUrl":"https://..." }
+  - Response: updated user object
+  - Errors: 400 validation, 401/403 auth
+
+PRODUCTS
+
+- GET /api/products
+  - Purpose: Browse public products with optional search and filters.
+  - Auth: public
+  - Query: q (text search), category, page (default 1), limit (default 20)
+  - Response (200): { items: [ { id, title, price, images, category, available } ], page, limit, total }
+  - Errors: none (400 if invalid query params)
+
+- GET /api/products/:id
+  - Purpose: Product detail view including seller summary.
+  - Auth: public
+  - Response (200): product object with seller: { id, username, avatarUrl }
+  - Errors: 404 not found
+
+- POST /api/products
+  - Purpose: Create a new product listing (seller = current user).
+  - Auth: Bearer JWT
+  - Request: { title, description, category, price, images, condition, location }
+  - Response (201): created product object
+  - Errors: 400 validation, 401 auth
+
+- PUT /api/products/:id
+  - Purpose: Update an existing product (owner only).
+  - Auth: Bearer JWT + owner
+  - Request: any product fields to change
+  - Response (200): updated product
+  - Errors: 400 validation, 403 not owner, 404 not found
+
+- DELETE /api/products/:id
+  - Purpose: Delete a listing (owner only). Returns 204 No Content on success.
+  - Auth: Bearer JWT + owner
+  - Response: 204 No Content
+  - Errors: 403 not owner, 404 not found
+
+- POST /api/products/:id/flag
+  - Purpose: Report a product (creates a Flag entry for moderators).
+  - Auth: Bearer JWT
+  - Request: { reason: "spam" }
+  - Response (201): flag object
+  - Errors: 400 validation, 401 auth
+
+CART & CHECKOUT
+
+- GET /api/cart
+  - Purpose: Return the user's cart and snapshot product info for each item.
+  - Auth: Bearer JWT
+  - Response: { user, items: [ { product: {id,title,price,images}, qty, priceAtAdd } ], updatedAt }
+
+- POST /api/cart
+  - Purpose: Add a product to the user's cart or increase qty.
+  - Auth: Bearer JWT
+  - Request: { productId, qty }
+  - Response: updated cart object (populated)
+  - Errors: 400 validation, 404 product unavailable
+
+- PUT /api/cart
+  - Purpose: Replace the entire cart items array (client submits snapshot).
+  - Auth: Bearer JWT
+  - Request: { items: [ { product: "<id>", qty: 1, priceAtAdd: 100 } ] }
+  - Response: updated cart object
+  - Errors: 400 validation
+
+- DELETE /api/cart/:productId
+  - Purpose: Remove an item from the cart.
+  - Auth: Bearer JWT
+  - Response: updated cart
+  - Errors: 404 cart not found
+
+- POST /api/cart/checkout
+  - Purpose: Simulate purchase of all cart items. Uses atomic product locking / transactions when available.
+  - Auth: Bearer JWT
+  - Request: { paymentMethod: "mock" }
+  - Response (201): { orderId, status: "completed", totalAmount }
+  - Errors: 400 cart empty, 409 product not available, 401 auth
+
+- POST /api/checkout
+  - Purpose: Alias for cart checkout to match API.md.
+  - Auth: Bearer JWT
+
+ORDERS
+
+- GET /api/orders
+  - Purpose: List orders made by the authenticated user.
+  - Auth: Bearer JWT
+  - Response: [ order, ... ]
+
+- GET /api/orders/:id
+  - Purpose: Order detail (available to buyer or admin).
+  - Auth: Bearer JWT
+  - Response: order object
+  - Errors: 403 not buyer/admin, 404 not found
+
+CATEGORIES (optional)
+
+- GET /api/categories
+  - Purpose: Public list of categories.
+  - Auth: public
+
+- POST /api/categories
+  - Purpose: Create a category (admin only).
+  - Auth: Bearer JWT + admin
+  - Request: { key, name }
+
+REVIEWS
+
+- GET /api/products/:id/reviews
+  - Purpose: Return reviews for a product.
+  - Auth: public
+
+- POST /api/products/:id/reviews
+  - Purpose: Create a review for a product (should be buyer in real app).
+  - Auth: Bearer JWT
+  - Request: { rating: 1-5, comment }
+
+FLAGS / MODERATION
+
+- POST /api/products/:id/flag
+  - Purpose: Report product (duplicate of above route accessible under products path).
+
+- GET /api/flags
+  - Purpose: Moderation listing of reported products; admin only.
+  - Auth: Bearer JWT + admin
+
+HEALTH
+
+- GET /health
+  - Purpose: Service health check (returns { status: 'ok' }).
+
+
+Notes
+- Auth uses JWT in Authorization: Bearer <token>
+- Admin routes check `req.user.role === 'admin'`
+- Cart checkout uses MongoDB transactions when available and marks products unavailable atomically
+- Validation performed via express-validator; required fields enforced on routes that accept JSON bodies
