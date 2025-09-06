@@ -1,4 +1,4 @@
-const { body, param, query } = require('express-validator');
+const { body } = require('express-validator');
 
 const register = [
     body('email').isEmail().withMessage('Valid email required'),
@@ -51,4 +51,15 @@ const checkout = [
     body('paymentMethod').optional().isString()
 ];
 
-module.exports = { register, login, productCreate, productUpdate, cartPost, cartPut, categoryCreate, reviewCreate, flagCreate, checkout };
+module.exports = { 
+    register, 
+    login, 
+    productCreate, 
+    productUpdate, 
+    cartPost, 
+    cartPut, 
+    categoryCreate, 
+    reviewCreate, 
+    flagCreate, 
+    checkout 
+};

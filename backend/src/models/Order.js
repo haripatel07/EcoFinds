@@ -13,8 +13,7 @@ const OrderSchema = new mongoose.Schema({
     items: { type: [OrderItemSchema], required: true },
     totalAmount: { type: Number, required: true },
     currency: { type: String, default: 'INR' },
-    status: { type: String, enum: ['created', 'completed', 'cancelled'], default: 'completed' },
-    createdAt: { type: Date, default: Date.now, index: true }
-});
+    status: { type: String, enum: ['created', 'completed', 'cancelled'], default: 'completed' }
+}, { timestamps: true });
 
 module.exports = mongoose.model('Order', OrderSchema);

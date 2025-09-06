@@ -13,9 +13,13 @@ const required = (name) => {
 module.exports = {
     port: process.env.PORT || 3000,
     mongoUri: process.env.MONGO_URI || process.env.MONGODB_URI || required('MONGO_URI'),
-    jwtSecret: process.env.JWT_SECRET || required('JWT_SECRET'),
+    jwtSecret: required('JWT_SECRET'),
     jwtExpire: process.env.JWT_EXPIRE || '30d',
-    bcryptRounds: Number(process.env.BCRYPT_SALT_ROUNDS || 10),
+    bcryptRounds: (() => {
+        const rounds = Number(process.env.BCRYPT_SALT_ROUNDS || 10);
+        if (Number.isNaN(rounds) || rounds < 4) throw new Error("Invalid bcrypt rounds");
+        return rounds;
+    })(),
     rateLimit: {
         windowMs: Number(process.env.RATE_LIMIT_WINDOW_MS || 60_000),
         max: Number(process.env.RATE_LIMIT_MAX || 100)
